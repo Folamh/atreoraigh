@@ -1,0 +1,17 @@
+{
+  "experiment": 0,
+  "instructions": [
+    {
+      "step": 1,
+      "instruction": "DROP"
+    },
+    {
+      "step": 2,
+      "instruction": "ACCEPT"
+    }
+    {
+      "step": 3,
+      "instruction": "DROP"
+    }
+  ]
+}

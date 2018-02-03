@@ -10,6 +10,6 @@ def build_instructions(experiment_json):
     }
 
     for instruction in experiment_json["instructions"]:
-        instructions.update({instruction["step"], command_map["instruction"]})
+        instructions.update({instruction["step"]: command_map[instruction["instruction"]]})
 
     return instructions

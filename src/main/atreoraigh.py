@@ -13,7 +13,7 @@ def setup_logger():
 
 setup_logger()
 
-instruction_counter = 0
+instruction_counter = 1
 
 
 def manage_packet(packet):
@@ -24,8 +24,8 @@ def manage_packet(packet):
 
     instructions[instruction_counter](packet)
     instruction_counter += 1
-    if instruction_counter >= len(instructions):
-        instruction_counter = 0
+    if instruction_counter > len(instructions):
+        instruction_counter = 1
 
 
 netfilter_queue.bind(1, manage_packet)

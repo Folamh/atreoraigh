@@ -1,7 +1,6 @@
 import json
 import logging
 from netfilterqueue import NetfilterQueue
-from experiment_builder import *
 
 netfilter_queue = NetfilterQueue()
 

@@ -1,8 +1,8 @@
 import json
 import logging
+import experiment_handler
 from netfilterqueue import NetfilterQueue
-
-netfilter_queue = NetfilterQueue()
+from packet_commands import get_payload
 
 
 def setup_logger():
@@ -12,19 +12,16 @@ def setup_logger():
 
 setup_logger()
 
-instruction_counter = 1
+netfilter_queue = NetfilterQueue()
+experiments = [experiment_handler.ExperimentHandler(56566)]
 
 
 def manage_packet(packet):
-    global instruction_counter
-
-    instructions = build_instructions(json.load(open(
-        "/home/rmurphy/Projects/atreoraigh/src/test/sample_instructions.json")))
-
-    instructions[instruction_counter](packet)
-    instruction_counter += 1
-    if instruction_counter > len(instructions):
-        instruction_counter = 1
+    payload = get_payload(packet)
+    logging.info('Packet sent to port: {}'.format(payload.dport))
+    for experiment in experiments:
+        if payload.dport == experiment.port:
+            experiment.manage_packet(packet)
 
 
 netfilter_queue.bind(1, manage_packet)

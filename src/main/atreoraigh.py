@@ -19,11 +19,12 @@ def manage_packet(packet):
             experiment.manage_packet(packet)
 
 
+global experiments
+experiments = []
 if __name__ == '__main__':
     setup_logger()
     server = experiment_handler.setup_server()
     netfilter_queue = NetfilterQueue()
-    experiments = []
     netfilter_queue.bind(1, manage_packet)
     try:
         logging.info('[*] waiting for data')

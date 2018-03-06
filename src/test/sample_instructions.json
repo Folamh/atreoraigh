@@ -1,6 +1,7 @@
 {
+  "type": "INSTRUCTIONS",
   "experiment": 0,
-  "port": 56565,
+  "port": 55555,
   "instructions": [
     {
       "step": 1,

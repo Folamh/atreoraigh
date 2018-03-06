@@ -3,6 +3,7 @@ import subprocess
 from netfilterqueue import NetfilterQueue
 
 import experiment_handler
+from globals import experiments
 from packet_commands import get_payload
 
 
@@ -19,8 +20,6 @@ def manage_packet(packet):
             experiment.manage_packet(packet)
 
 
-global experiments
-experiments = []
 if __name__ == '__main__':
     setup_logger()
     server = experiment_handler.setup_server()
@@ -30,8 +29,6 @@ if __name__ == '__main__':
         logging.info('[*] waiting for data')
         netfilter_queue.run()
     finally:
-        logging.info('Shutting down experiment server...')
-        server.shutdown()
         logging.info('Flushing routing tables.')
         flush_command = ['sudo', 'iptables', '-F']
         subprocess.Popen(flush_command).communicate()

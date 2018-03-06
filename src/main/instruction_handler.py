@@ -1,25 +1,41 @@
 import subprocess
 from packet_commands import *
+from globals import *
 
 
 class InstructionHandler:
     def __init__(self, port):
         self.port = port
-        self.experiment = 0
-        self.experiment_json = {}
+        self.experiments_queue = {}
         self.instructions = {}
         self.instruction_counter = 1
+        self.lineage = {}
         self.route_port()
 
     def manage_packet(self, packet):
         if self.instructions:
+            logging.info("Recording packet.")
+            self.lineage_recorder(packet)
             self.instructions[self.instruction_counter](packet)
             self.instruction_counter += 1
             if self.instruction_counter > len(self.instructions):
-                self.instruction_counter = 1
+                logging.info("Instructions for port " + str(self.port) + " finished. Lineage: " + str(self.lineage))
+                self.instructions = {}
+
         else:
-            logging.info('No instructions for port: {}. Defaulting to accept packet.'.format(self.port))
+            logging.warning(
+                'Experiment not started or no instructions for port: {}. Defaulting to accept packet.'.format(
+                    self.port))
             accept_packet(packet)
+
+    def lineage_recorder(self, packet):
+        payload = get_payload(packet)
+        self.lineage[current_experiment].append({self.instruction_counter: {
+            "src": payload.src,
+            "dst": payload.dst,
+            "dport": payload.dport,
+            "data": payload.load
+        }})
 
     def route_port(self):
         routing_command = ['sudo', 'iptables', '-A', 'INPUT', '-p', 'udp', '--dport', str(self.port), '-j', 'NFQUEUE',
@@ -39,4 +55,11 @@ class InstructionHandler:
         for instruction in experiment_json["instructions"]:
             instructions.update({instruction["step"]: command_map[instruction["instruction"]]})
 
-        self.instructions = instructions
+        self.experiments_queue.update({experiment_json["experiment"]: instructions})
+
+    def setup_experiment(self):
+        self.instructions = self.experiments_queue[current_experiment]
+        self.lineage.update({current_experiment: []})
+
+    def get_lineage(self):
+        return self.lineage

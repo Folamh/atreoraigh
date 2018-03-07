@@ -28,6 +28,8 @@ class InstructionHandler:
                     self.port))
             accept_packet(packet)
 
+    # TODO Add a record start and finish
+
     def lineage_recorder(self, packet):
         payload = get_payload(packet)
         self.lineage[current_experiment].append({self.instruction_counter: {

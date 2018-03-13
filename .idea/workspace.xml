@@ -3,21 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="cf4b38a5-1d4b-48bf-ba7b-9615f0aa6ba6" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change beforePath="$PROJECT_DIR$/2018-01-31-101934_1920x1080_scrot.png" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/src/main/__init__.py" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/src/main/atreoraigh.py" afterPath="$PROJECT_DIR$/atreoraigh.py" />
-      <change beforePath="$PROJECT_DIR$/src/main/experiment_handler.py" afterPath="$PROJECT_DIR$/experiment_handler.py" />
-      <change beforePath="$PROJECT_DIR$/src/main/globals.py" afterPath="$PROJECT_DIR$/global_vars.py" />
-      <change beforePath="$PROJECT_DIR$/src/main/instruction_handler.py" afterPath="$PROJECT_DIR$/instruction_handler.py" />
-      <change beforePath="$PROJECT_DIR$/src/main/packet_commands.py" afterPath="$PROJECT_DIR$/packet_commands.py" />
-      <change beforePath="$PROJECT_DIR$/src/test/client.py" afterPath="$PROJECT_DIR$/test/client.py" />
-      <change beforePath="$PROJECT_DIR$/src/test/controller.py" afterPath="$PROJECT_DIR$/test/controller.py" />
-      <change beforePath="$PROJECT_DIR$/src/test/netfilter_queue_test.sh" afterPath="$PROJECT_DIR$/test/netfilter_queue_test.sh" />
-      <change beforePath="$PROJECT_DIR$/src/test/sample_finish_experiment.json" afterPath="$PROJECT_DIR$/test/sample_finish_experiment.json" />
-      <change beforePath="$PROJECT_DIR$/src/test/sample_instructions.json" afterPath="$PROJECT_DIR$/test/sample_instructions.json" />
-      <change beforePath="$PROJECT_DIR$/src/test/sample_start_experiment.json" afterPath="$PROJECT_DIR$/test/sample_start_experiment.json" />
-      <change beforePath="$PROJECT_DIR$/src/test/server.py" afterPath="$PROJECT_DIR$/test/server.py" />
-      <change beforePath="$PROJECT_DIR$/src/test/workshop.py" afterPath="$PROJECT_DIR$/test/workshop.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -343,7 +328,21 @@
       <option name="project" value="LOCAL" />
       <updated>1520452328728</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="Change of project structure and addition of config file.">
+      <created>1520970747493</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1520970747493</updated>
+    </task>
+    <task id="LOCAL-00010" summary="config commit">
+      <created>1520970801807</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1520970801807</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -415,7 +414,9 @@
     <MESSAGE value="Issue with socketserver while threading." />
     <MESSAGE value="Got request server setup, error with finish experiment flag." />
     <MESSAGE value="Small cleanup, added todos." />
-    <option name="LAST_COMMIT_MESSAGE" value="Small cleanup, added todos." />
+    <MESSAGE value="Change of project structure and addition of config file." />
+    <MESSAGE value="config commit" />
+    <option name="LAST_COMMIT_MESSAGE" value="config commit" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
   <component name="XDebuggerManager">

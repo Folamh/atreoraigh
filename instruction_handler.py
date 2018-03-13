@@ -1,6 +1,6 @@
 import subprocess
 from packet_commands import *
-from globals import *
+from global_vars import *
 
 
 class InstructionHandler:

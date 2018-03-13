@@ -4,12 +4,12 @@ import socket
 import threading
 
 import instruction_handler
-import globals
+import global_vars
 
 
 def experiment_instructions(data_json):
     add_to_experiments = True
-    for experiment in globals.experiments:
+    for experiment in global_vars.experiments:
         if experiment.port == data_json["port"]:
             logging.info('Adding new instructions to experiment.')
             experiment.experiment_json = data_json
@@ -18,16 +18,16 @@ def experiment_instructions(data_json):
 
     if add_to_experiments:
         logging.info('Adding new experiment.')
-        globals.experiments.append(instruction_handler.InstructionHandler(int(data_json["port"])))
-        logging.debug(globals.experiments)
-        for experiment in globals.experiments:
+        global_vars.experiments.append(instruction_handler.InstructionHandler(int(data_json["port"])))
+        logging.debug(global_vars.experiments)
+        for experiment in global_vars.experiments:
             if experiment.port == data_json["port"]:
                 experiment.build_instructions(data_json)
 
 
 def start_experiment(data_json):
-    globals.current_experiment = data_json["experiment"]
-    for experiment in globals.experiments:
+    global_vars.current_experiment = data_json["experiment"]
+    for experiment in global_vars.experiments:
         experiment.setup_experiment()
 
 
@@ -75,7 +75,7 @@ class ThreadedServer(object):
 
 
 def setup_server():
-    HOST, PORT = '', 56565
+    HOST, PORT = global_vars.config["HOST"], global_vars.config["PORT"]
     server = ThreadedServer(HOST, PORT)
     threaded_server = threading.Thread(target=server.listen, daemon=True)
     threaded_server.start()

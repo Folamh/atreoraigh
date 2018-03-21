@@ -11,7 +11,7 @@ def print_and_accept(pkt):
 
 
 def get_payload(packet):
-    return scapy.IP(packet.get_payload())
+    return IP(packet.get_payload())
 
 
 nf_queue = NetfilterQueue()

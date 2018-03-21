@@ -12,12 +12,13 @@ class InstructionHandler:
         self.instructions = {}
         self.instruction_counter = 1
         self.lineage = {}
-        self.route_port()
+        self.route_port(self.port, 'INPUT')
 
     def manage_packet(self, packet):
         if self.instructions:
             logging.info("Recording packet.")
-            self.lineage_recorder(packet)
+            payload = get_payload(packet)
+            self.lineage_recorder(payload)
             self.instructions[self.instruction_counter](packet)
             self.instruction_counter += 1
             if self.instruction_counter > len(self.instructions):
@@ -35,8 +36,7 @@ class InstructionHandler:
 
     # TODO Add a record start and finish
 
-    def lineage_recorder(self, packet):
-        payload = get_payload(packet)
+    def lineage_recorder(self, payload):
         self.lineage[global_vars.current_experiment].append({self.instruction_counter: {
             "src": payload.src,
             "dst": payload.dst,
@@ -44,11 +44,11 @@ class InstructionHandler:
             "data": payload.load.decode("utf-8")
         }})
 
-    def route_port(self):
+    def route_port(self, port, direction):
         logging.info('Creating new route for port: {}.'.format(self.port))
 
         def route(type):
-            routing_command = ['sudo', 'iptables', '-A', 'INPUT', '-p', type, '--dport', str(self.port), '-j',
+            routing_command = ['sudo', 'iptables', '-A', direction, '-p', type, '--dport', str(port), '-j',
                                'NFQUEUE',
                                '--queue-num', '1']
             logging.debug(routing_command)

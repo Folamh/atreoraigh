@@ -6,10 +6,13 @@ from netfilterqueue import NetfilterQueue
 import experiment_handler
 import global_vars
 from packet_commands import get_payload
+import os
+
+global_vars.dir_path = os.path.dirname(os.path.realpath(__file__))
 
 
 def read_config():
-    with open('config.json') as json_data:
+    with open(os.path.join(global_vars.dir_path, 'config.json')) as json_data:
         global_vars.config = json.load(json_data)
 
 

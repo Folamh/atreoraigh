@@ -5,6 +5,30 @@ from packet_commands import *
 import global_vars
 
 
+def route_port(port, direction):
+    logging.info('Creating new route for port: {}.'.format(port))
+
+    def route(type):
+        routing_command = ['sudo', 'iptables', '-A', direction, '-p', type, '--dport', str(port), '-j',
+                           'NFQUEUE',
+                           '--queue-num', '1']
+        logging.debug(routing_command)
+        subprocess.Popen(routing_command).communicate()
+
+    route('udp')
+    route('tcp')
+
+
+class ReturnRouteHandler:
+    def __init__(self, port):
+        self.port = port
+
+    def manage_packet(self, packet):
+        if self.instructions:
+            logging.info("Recording packet.")
+            payload = get_payload(packet)
+
+
 class InstructionHandler:
     def __init__(self, port):
         self.port = port
@@ -12,12 +36,16 @@ class InstructionHandler:
         self.instructions = {}
         self.instruction_counter = 1
         self.lineage = {}
-        self.route_port(self.port, 'INPUT')
+        route_port(self.port, 'INPUT')
 
     def manage_packet(self, packet):
         if self.instructions:
             logging.info("Recording packet.")
             payload = get_payload(packet)
+            
+            if payload.proto == 6:
+                global_vars.experiments.append(instruction_handler.InstructionHandler())
+
             self.lineage_recorder(payload)
             self.instructions[self.instruction_counter](packet)
             self.instruction_counter += 1
@@ -27,7 +55,6 @@ class InstructionHandler:
                     {global_vars.current_experiment: self.lineage[global_vars.current_experiment]})
                 self.instructions = {}
                 self.instruction_counter = 1
-
         else:
             logging.warning(
                 'Experiment not started or no instructions for port: {}. Defaulting to accept packet.'.format(
@@ -43,19 +70,6 @@ class InstructionHandler:
             "dport": payload.dport,
             "data": payload.load.decode("utf-8")
         }})
-
-    def route_port(self, port, direction):
-        logging.info('Creating new route for port: {}.'.format(self.port))
-
-        def route(type):
-            routing_command = ['sudo', 'iptables', '-A', direction, '-p', type, '--dport', str(port), '-j',
-                               'NFQUEUE',
-                               '--queue-num', '1']
-            logging.debug(routing_command)
-            subprocess.Popen(routing_command).communicate()
-
-        route('udp')
-        route('tcp')
 
     def build_instructions(self, experiment_json):
         instructions = {}

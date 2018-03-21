@@ -42,9 +42,6 @@ class InstructionHandler:
         if self.instructions:
             logging.info("Recording packet.")
             payload = get_payload(packet)
-            
-            if payload.proto == 6:
-                global_vars.experiments.append(instruction_handler.InstructionHandler())
 
             self.lineage_recorder(payload)
             self.instructions[self.instruction_counter](packet)

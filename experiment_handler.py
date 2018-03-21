@@ -7,6 +7,16 @@ import instruction_handler
 import global_vars
 
 
+def send_lineage(lineage):
+    logging.info('Sending lineage to controller')
+    data = json.dumps(lineage)
+    controller_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    controller_socket.connect(('', 11111))
+    controller_socket.sendall(bytes(data, 'utf-8'))
+    controller_socket.recv(1024)
+    controller_socket.close()
+
+
 def experiment_instructions(data_json):
     add_to_experiments = True
     for experiment in global_vars.experiments:
@@ -19,7 +29,6 @@ def experiment_instructions(data_json):
     if add_to_experiments:
         logging.info('Adding new experiment.')
         global_vars.experiments.append(instruction_handler.InstructionHandler(int(data_json["port"])))
-        logging.debug(global_vars.experiments)
         for experiment in global_vars.experiments:
             if experiment.port == data_json["port"]:
                 experiment.build_instructions(data_json)
@@ -27,6 +36,7 @@ def experiment_instructions(data_json):
 
 def start_experiment(data_json):
     global_vars.current_experiment = data_json["experiment"]
+    logging.info('Starting experiment: ' + str(global_vars.current_experiment))
     for experiment in global_vars.experiments:
         experiment.setup_experiment()
 

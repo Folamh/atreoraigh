@@ -11,7 +11,7 @@ def send_lineage(lineage):
     logging.info('Sending lineage to controller')
     data = json.dumps(lineage)
     controller_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    controller_socket.connect(('', 11111))
+    controller_socket.connect((global_vars.config["CONTROLLER-HOST"], global_vars.config["CONTROLLER-PORT"]))
     controller_socket.sendall(bytes(data, 'utf-8'))
     controller_socket.recv(1024)
     controller_socket.close()
@@ -50,17 +50,26 @@ def listen_to_client(client, address):
             logging.info(received)
             data_json = json.loads(data)
             if data:
-                if data_json["type"] == "INSTRUCTIONS":
+                if data_json["type"] == "HANDSHAKE":
+                    global_vars.config["CONTROLLER-HOST"] = data_json["host"]
+                    global_vars.config["CONTROLLER-PORT"] = data_json["port"]
+                elif data_json["type"] == "INSTRUCTIONS":
                     experiment_instructions(data_json)
-                    response = bytes(received, 'utf-8')
-                    client.send(response)
                 elif data_json["type"] == "START":
                     start_experiment(data_json)
-                    response = bytes(received, 'utf-8')
-                    client.send(response)
-                # TODO Add a record start and finish
+                elif data_json["type"] == "FINISH":
+                    for experiment in global_vars.experiments:
+                        experiment.setup_experiment()
+                elif data_json["type"] == "RECORD":
+                    for experiment in global_vars.experiments:
+                        experiment.setup_recording()
+                elif data_json["type"] == "RECORD-FINISH":
+                    for experiment in global_vars.experiments:
+                        experiment.recording_finished()
                 else:
                     raise Exception('Invalid JSON.')
+                response = bytes(received, 'utf-8')
+                client.send(response)
             else:
                 raise Exception('Client disconnected')
         except:

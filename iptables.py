@@ -1,14 +1,13 @@
 import global_vars
 import subprocess
 import logging
-import time
 
 
 def delete_route(type, port, direction):
     key = direction + '-' + type + '-' + str(port)
-    if key in global_vars.routes[key]:
+    if global_vars.routes.get(key, None):
         logging.debug('Deleting route for: {}'.format(port))
-        subprocess.Popen(['sudo', 'iptables', '-D'] + global_vars.routes[key])
+        subprocess.Popen(['sudo', 'iptables', '-D'] + global_vars.routes[key]).communicate()
 
 
 def create_route(type, port, direction):
@@ -29,3 +28,9 @@ def reject_route(type, port, direction):
     global_vars.routes.update({key: routing_command})
     logging.debug(routing_command)
     subprocess.Popen(['sudo', 'iptables', '-A'] + routing_command).communicate()
+
+
+def reset():
+    logging.info('Flushing routing tables.')
+    flush_command = ['sudo', 'iptables', '-F']
+    subprocess.Popen(flush_command).communicate()

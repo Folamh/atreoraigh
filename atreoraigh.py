@@ -1,12 +1,11 @@
 import json
 import logging
-import subprocess
 from netfilterqueue import NetfilterQueue
-
 import experiment_handler
 import global_vars
 from packet_commands import get_payload
 import os
+import iptables
 
 global_vars.dir_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -30,9 +29,7 @@ def manage_packet(packet):
 
 
 def shutdown():
-    logging.info('Flushing routing tables.')
-    flush_command = ['sudo', 'iptables', '-F']
-    subprocess.Popen(flush_command).communicate()
+    iptables.reset()
     print('Shutting down...')
     exit(0)
 

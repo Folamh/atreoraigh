@@ -2,19 +2,8 @@ import json
 import logging
 import socket
 import threading
-
 import instruction_handler
 import global_vars
-
-
-def send_lineage(lineage):
-    logging.info('Sending lineage to controller')
-    data = json.dumps(lineage)
-    controller_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    controller_socket.connect((global_vars.config["CONTROLLER-HOST"], global_vars.config["CONTROLLER-PORT"]))
-    controller_socket.sendall(bytes(data, 'utf-8'))
-    controller_socket.recv(1024)
-    controller_socket.close()
 
 
 def experiment_instructions(data_json):
@@ -28,10 +17,25 @@ def experiment_instructions(data_json):
 
     if add_to_experiments:
         logging.info('Adding new experiment.')
-        global_vars.experiments.append(instruction_handler.InstructionHandler(int(data_json["port"])))
+        new_instruction_handler = instruction_handler.InstructionHandler(int(data_json["port"]), 'INPUT')
+        new_instruction_handler.build_instructions(data_json)
+        global_vars.experiments.append(new_instruction_handler)
+
+
+def experiment_record(data_json):
+    add_to_experiments = True
+    for port in data_json["ports"]:
         for experiment in global_vars.experiments:
-            if experiment.port == data_json["port"]:
-                experiment.build_instructions(data_json)
+            if experiment.port == port["port"]:
+                logging.info('Setting port {} to record.'.format(port["port"]))
+                experiment.setup_recording()
+                add_to_experiments = False
+
+        if add_to_experiments:
+            logging.info('Adding new port {} to record.'.format(port["port"]))
+            new_instruction_handler = instruction_handler.InstructionHandler(int(port["port"]), 'INPUT')
+            new_instruction_handler.setup_recording()
+            global_vars.experiments.append(new_instruction_handler)
 
 
 def start_experiment(data_json):
@@ -47,29 +51,43 @@ def listen_to_client(client, address):
         try:
             data = client.recv(size)
             received = "Received:{}".format(data)
-            logging.info(received)
             data_json = json.loads(data)
             if data:
-                if data_json["type"] == "HANDSHAKE":
-                    global_vars.config["CONTROLLER-HOST"] = data_json["host"]
-                    global_vars.config["CONTROLLER-PORT"] = data_json["port"]
-                elif data_json["type"] == "INSTRUCTIONS":
+                logging.info(received)
+                if data_json["type"] == "INSTRUCTIONS":
                     experiment_instructions(data_json)
+                    response = bytes('INSTRUCTIONS', 'utf-8')
+                    client.sendall(response)
+
                 elif data_json["type"] == "START":
                     start_experiment(data_json)
+                    response = bytes('START', 'utf-8')
+                    client.sendall(response)
+
                 elif data_json["type"] == "FINISH":
+                    logging.info('Sending lineage to controller')
                     for experiment in global_vars.experiments:
-                        experiment.setup_experiment()
+                        data = json.dumps(experiment.experiment_finished())
+                        response = bytes(data, 'utf-8')
+                        client.sendall(response)
+
                 elif data_json["type"] == "RECORD":
-                    for experiment in global_vars.experiments:
-                        experiment.setup_recording()
+                    experiment_record(data_json)
+                    response = bytes('RECORD', 'utf-8')
+                    client.sendall(response)
+
                 elif data_json["type"] == "RECORD-FINISH":
+                    logging.info('Sending lineage to controller')
                     for experiment in global_vars.experiments:
-                        experiment.recording_finished()
+                        data = json.dumps(experiment.recording_finished())
+                        response = bytes(data, 'utf-8')
+                        client.sendall(response)
+                elif data_json["type"] == "RESET":
+                    logging.info('Resetting node.')
+                    global_vars.reset()
                 else:
                     raise Exception('Invalid JSON.')
-                response = bytes(received, 'utf-8')
-                client.send(response)
+                client.close()
             else:
                 raise Exception('Client disconnected')
         except:

@@ -4,6 +4,7 @@ import experiment_handler
 from packet_commands import *
 import global_vars
 import iptables
+from datetime import datetime
 
 
 def route_port(port, direction):
@@ -12,15 +13,16 @@ def route_port(port, direction):
     iptables.create_route('tcp', port, direction)
 
 
-def reject_port(self):
+def reject_port(port, direction):
     logging.info('Creating rejection route for port: {}.'.format(port))
-    iptables.reject_route('udp', self.port, direction)
-    iptables.reject_route('tcp', self.port, direction)
+    iptables.reject_route('udp', port, direction)
+    iptables.reject_route('tcp', port, direction)
 
 
 class InstructionHandler:
-    def __init__(self, port):
+    def __init__(self, port, direction):
         self.port = port
+        self.direction = direction
         self.experiments_queue = {}
         self.instructions = {}
         self.instruction_counter = 1
@@ -36,7 +38,7 @@ class InstructionHandler:
             self.lineage_recorder(payload)
             self.instructions[self.instruction_counter](packet)
             if self.instruction_counter > len(self.instructions):
-                self.instruction_counter = 1
+                self.record = True
         else:
             logging.warning(
                 'Experiment not started or no instructions for port: {}. '
@@ -46,20 +48,13 @@ class InstructionHandler:
 
     def lineage_recorder(self, payload):
         logging.info('Recording packet.')
-        if payload.load:
-            self.lineage[global_vars.current_experiment].append({
-                self.instruction_counter: {
-                    'src': payload.src,
-                    'dst': payload.dst,
-                    'dport': payload.dport,
-                    'data': payload.load.decode('utf-8')
-                }
-            })
-
-    def recording_finished(self):
-        logging.info('Recording for port ' + str(self.port) + ' finished. Lineage: ' + str(self.lineage))
-        experiment_handler.send_lineage({
-            'RECORDING': self.lineage[0]
+        self.lineage[global_vars.current_experiment].append({
+            datetime.strftime(datetime.utcnow(), '%Y-%m-%d-%H-%M-%S-%f'): {
+                'src': payload.src,
+                'dst': payload.dst,
+                'dport': payload.dport,
+                'data': payload.load.decode('utf-8')
+            }
         })
 
     def build_instructions(self, experiment_json):
@@ -72,7 +67,8 @@ class InstructionHandler:
 
         for instruction in experiment_json['instructions']:
             if instruction['instruction'] == 'REJECT':
-                self.reject_port()
+                logging.debug("REJECT called")
+                reject_port(self.port, self.direction)
             else:
                 instructions.update({
                     instruction['step']: command_map[instruction['instruction']]
@@ -83,23 +79,26 @@ class InstructionHandler:
         })
 
     def setup_experiment(self):
+        self.record = False
+        self.instruction_counter = 1
         self.instructions = self.experiments_queue[global_vars.current_experiment]
         self.lineage.update({global_vars.current_experiment: []})
 
+    def experiment_finished(self):
+        logging.info('Instructions for port ' + str(self.port) + ' finished. Lineage: ' + str(self.lineage[global_vars.
+                                                                                              current_experiment]))
+        self.instructions = {}
+        return {'EXPERIMENT' + '-' + str(global_vars.current_experiment) + '-' + str(self.port): self.lineage[
+            global_vars.current_experiment]}
+
     def setup_recording(self):
         self.record = True
-        self.lineage.update({'RECORDING': []})
-
-    def experiment_finished(self):
-        logging.info('Instructions for port ' + str(self.port) + ' finished. Lineage: ' + str(self.lineage))
-        experiment_handler.send_lineage({
-            global_vars.current_experiment: self.lineage[global_vars.current_experiment]
-        })
-        self.instructions = {}
+        global_vars.current_experiment = 0
+        self.lineage.update({global_vars.current_experiment: []})
+        route_port(self.port, self.direction)
 
     def recording_finished(self):
-        logging.info('Instructions for port ' + str(self.port) + ' finished. Lineage: ' + str(self.lineage))
-        experiment_handler.send_lineage({
-            global_vars.current_experiment: self.lineage[global_vars.current_experiment]
-        })
+        logging.info('Recording for port ' + str(self.port) + ' finished. Lineage: ' + str(self.lineage))
         self.instructions = {}
+        return {'RECORDING' + '-' + str(self.port): self.lineage[0]}
+

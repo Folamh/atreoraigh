@@ -13,9 +13,6 @@ def read_config():
     with open(os.path.join(global_vars.dir_path, 'configs', 'config.json')) as json_data:
         global_vars.config = json.load(json_data)
 
-    global_vars.config["HOST"] = subprocess.Popen(['hostname', '-I']).communicate()
-    print(global_vars.config["HOST"])
-
 
 def setup_logger():
     log_format = '%(asctime)-15s %(levelname)s: %(message)s'

@@ -120,7 +120,7 @@ class ThreadedServer(object):
 
 
 def setup_server():
-    HOST, PORT = '', global_vars.config["PORT"]
+    HOST, PORT = '0.0.0.0', global_vars.config["PORT"]
     server = ThreadedServer(HOST, PORT)
     threaded_server = threading.Thread(target=server.listen, daemon=True)
     threaded_server.start()

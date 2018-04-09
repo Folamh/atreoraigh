@@ -113,8 +113,8 @@ class InstructionHandler:
         logging.info('Instructions for port ' + str(self.port) + ' finished. Lineage: ' + str(self.lineage[global_vars.
                                                                                               current_experiment]))
         self.instructions = {}
-        return {'EXPERIMENT' + '-' + str(global_vars.current_experiment) + '-' + str(self.port): self.lineage[
-            global_vars.current_experiment]}
+        return {'EXPERIMENT{}-{}-{}'.format(str(global_vars.current_experiment), global_vars.config['host'],
+                                            str(self.port)): self.lineage[global_vars.current_experiment]}
 
     def setup_recording(self):
         self.record = True
@@ -124,5 +124,5 @@ class InstructionHandler:
     def recording_finished(self):
         logging.info('Recording for port ' + str(self.port) + ' finished. Lineage: ' + str(self.lineage))
         self.instructions = {}
-        return {'RECORDING' + '-' + str(self.port): self.lineage[0]}
+        return {'RECORDING-{}-{}'.format(global_vars.config['host'], str(self.port)): self.lineage[0]}
 

@@ -9,25 +9,27 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 
 
 def send_json(host, filename):
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as node_sock:
+    print(host, filename)
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
         with open(filename, 'r') as json_file:
             data = json.load(json_file)
-        node_sock.connect((host, 11211))
-        node_sock.sendall(bytes(json.dumps(data), 'utf-8'))
+        sock.connect((host, 11211))
+        sock.sendall(bytes(json.dumps(data), 'utf-8'))
 
         while True:
-            response = str(node_sock.recv(1024), 'utf-8')
+            response = str(sock.recv(1024), 'utf-8')
+            print('Received: {}'.format(response))
             if response:
                 print('Received: {}'.format(response))
             else:
                 break
-        node_sock.close()
+        sock.close()
 
 
 hosts = {
-    'program': 'ec2-52-51-178-23.eu-west-1.compute.amazonaws.com',
-    'database1': 'ec2-34-245-55-36.eu-west-1.compute.amazonaws.com',
-    'database2': 'ec2-34-240-224-218.eu-west-1.compute.amazonaws.com'
+    'program': '52.51.178.23',
+    'database1': '34.245.55.36',
+    'database2': '34.240.224.218'
 }
 
 print('Recording test:')

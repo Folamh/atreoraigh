@@ -1,6 +1,11 @@
 import json
 import socket
 import time
+import os
+import subprocess
+
+
+dir_path = os.path.dirname(os.path.realpath(__file__))
 
 
 def send_client(port, message):
@@ -24,25 +29,38 @@ def send_json(filename):
                 break
         node_sock.close()
 
-
-print('Start recording test')
-send_json('/home/rmurphy/Projects/atreoraigh/test/sample_start_record.json')
+#
+print('Recording test:')
+send_json(os.path.join(dir_path, 'samples', 'udp', 'sample_start_record.json'))
 time.sleep(10)
 send_client(55555, "Test0")
 time.sleep(3)
-send_json('/home/rmurphy/Projects/atreoraigh/test/sample_finish_record.json')
+send_json(os.path.join(dir_path, 'samples', 'sample_finish_record.json'))
 time.sleep(3)
 
-print('Send instructions test')
-send_json('/home/rmurphy/Projects/atreoraigh/test/sample_instructions0.json')
+print('\n\nInstructions test:')
+send_json(os.path.join(dir_path, 'samples', 'udp', 'sample_instructions0.json'))
 time.sleep(3)
-send_json('/home/rmurphy/Projects/atreoraigh/test/sample_instructions1.json')
+send_json(os.path.join(dir_path, 'samples', 'udp', 'sample_instructions1.json'))
 time.sleep(3)
-send_json('/home/rmurphy/Projects/atreoraigh/test/sample_instructions2.json')
+send_json(os.path.join(dir_path, 'samples', 'udp', 'sample_instructions2.json'))
+time.sleep(3)
 
-print('Start experiment test')
-send_json('/home/rmurphy/Projects/atreoraigh/test/sample_start_experiment.json')
+print('\n\nExperiment test:')
+send_json(os.path.join(dir_path, 'samples', 'udp', 'sample_start_experiment.json'))
 time.sleep(3)
 send_client(55555, "Test1")
 time.sleep(3)
-send_json('/home/rmurphy/Projects/atreoraigh/test/sample_finish_experiment.json')
+send_json(os.path.join(dir_path, 'samples', 'sample_finish_experiment.json'))
+time.sleep(3)
+
+print('\n\nReset test:')
+send_json(os.path.join(dir_path, 'samples', 'sample_reset.json'))
+
+print('\n\nRecording test:')
+send_json(os.path.join(dir_path, 'samples', 'tcp', 'sample_start_record.json'))
+time.sleep(10)
+data = subprocess.Popen(["python", os.path.join(dir_path, 'tcp', 'client.py')])
+time.sleep(5)
+send_json(os.path.join(dir_path, 'samples', 'sample_finish_record.json'))
+time.sleep(3)

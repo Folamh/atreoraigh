@@ -1,12 +1,11 @@
-#! /usr/bin/env python2.7
 from scapy.all import *
-
 from netfilterqueue import NetfilterQueue
 import socket
 
 
 def print_and_accept(pkt):
-    print(get_payload(pkt).show())
+    if get_payload(pkt).getlayer(Raw):
+        print(get_payload(pkt).load)
     pkt.accept()
 
 

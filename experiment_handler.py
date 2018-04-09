@@ -4,6 +4,7 @@ import socket
 import threading
 import instruction_handler
 import global_vars
+import iptables
 
 
 def experiment_instructions(data_json):
@@ -56,12 +57,12 @@ def listen_to_client(client, address):
                 logging.info(received)
                 if data_json["type"] == "INSTRUCTIONS":
                     experiment_instructions(data_json)
-                    response = bytes('INSTRUCTIONS', 'utf-8')
+                    response = bytes('INSTRUCTIONS-OK', 'utf-8')
                     client.sendall(response)
 
                 elif data_json["type"] == "START":
                     start_experiment(data_json)
-                    response = bytes('START', 'utf-8')
+                    response = bytes('START-OK', 'utf-8')
                     client.sendall(response)
 
                 elif data_json["type"] == "FINISH":
@@ -70,10 +71,13 @@ def listen_to_client(client, address):
                         data = json.dumps(experiment.experiment_finished())
                         response = bytes(data, 'utf-8')
                         client.sendall(response)
+                    response = bytes('FINISH-OK', 'utf-8')
+                    client.sendall(response)
 
                 elif data_json["type"] == "RECORD":
+                    global_vars.current_experiment = 0
                     experiment_record(data_json)
-                    response = bytes('RECORD', 'utf-8')
+                    response = bytes('RECORD-OK', 'utf-8')
                     client.sendall(response)
 
                 elif data_json["type"] == "RECORD-FINISH":
@@ -82,9 +86,15 @@ def listen_to_client(client, address):
                         data = json.dumps(experiment.recording_finished())
                         response = bytes(data, 'utf-8')
                         client.sendall(response)
+                    response = bytes('RECORD-FINISH-OK', 'utf-8')
+                    client.sendall(response)
+
                 elif data_json["type"] == "RESET":
                     logging.info('Resetting node.')
+                    iptables.reset()
                     global_vars.reset()
+                    response = bytes('RESET-OK', 'utf-8')
+                    client.sendall(response)
                 else:
                     raise Exception('Invalid JSON.')
                 client.close()

@@ -6,6 +6,11 @@ import global_vars
 import iptables
 from datetime import datetime
 
+proto_values = {
+    6: 'TCP',
+    17: 'UDP'
+}
+
 
 def route_port(port, direction):
     logging.info('Creating reroute for port: {}.'.format(port))
@@ -31,6 +36,18 @@ class InstructionHandler:
 
     def manage_packet(self, packet):
         payload = get_payload(packet)
+        if proto_values[payload.proto] == 'TCP':
+            add_to_experiments = True
+            for experiment in global_vars.experiments:
+                if experiment.port == payload.sport:
+                    add_to_experiments = False
+
+            if add_to_experiments:
+                logging.info('Adding new experiment.')
+                new_instruction_handler = InstructionHandler(payload.sport, 'OUTPUT')
+                new_instruction_handler.setup_recording()
+                global_vars.experiments.append(new_instruction_handler)
+
         if self.record:
             self.lineage_recorder(payload)
             accept_packet(packet)
@@ -47,15 +64,18 @@ class InstructionHandler:
             accept_packet(packet)
 
     def lineage_recorder(self, payload):
-        logging.info('Recording packet.')
-        self.lineage[global_vars.current_experiment].append({
-            datetime.strftime(datetime.utcnow(), '%Y-%m-%d-%H-%M-%S-%f'): {
-                'src': payload.src,
-                'dst': payload.dst,
-                'dport': payload.dport,
-                'data': payload.load.decode('utf-8')
-            }
-        })
+        if payload.getlayer(scapy.Raw):
+            logging.info('Recording packet.')
+            self.lineage[global_vars.current_experiment].append({
+                datetime.strftime(datetime.utcnow(), '%Y-%m-%d-%H-%M-%S-%f'): {
+                    'src': payload.src,
+                    'sport': payload.sport,
+                    'dst': payload.dst,
+                    'dport': payload.dport,
+                    'type': proto_values[payload.proto],
+                    'data': payload.load.decode('utf-8')
+                }
+            })
 
     def build_instructions(self, experiment_json):
         instructions = {}
@@ -67,7 +87,6 @@ class InstructionHandler:
 
         for instruction in experiment_json['instructions']:
             if instruction['instruction'] == 'REJECT':
-                logging.debug("REJECT called")
                 reject_port(self.port, self.direction)
             else:
                 instructions.update({
@@ -93,7 +112,6 @@ class InstructionHandler:
 
     def setup_recording(self):
         self.record = True
-        global_vars.current_experiment = 0
         self.lineage.update({global_vars.current_experiment: []})
         route_port(self.port, self.direction)
 

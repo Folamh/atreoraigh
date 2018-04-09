@@ -1,0 +1,6 @@
+{
+  "type": "RECORD",
+  "ports": [
+    {"port": 5432}
+  ]
+}

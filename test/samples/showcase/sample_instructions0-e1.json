@@ -1,0 +1,11 @@
+{
+  "type": "INSTRUCTIONS",
+  "experiment": 1,
+  "port": 5000,
+  "instructions": [
+    {
+      "step": 1,
+      "instruction": "ACCEPT"
+    }
+  ]
+}

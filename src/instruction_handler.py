@@ -1,9 +1,5 @@
-import subprocess
-
-import experiment_handler
-from packet_commands import *
-import global_vars
-import iptables
+from src.packet_commands import *
+from src import global_vars, iptables
 from datetime import datetime
 
 proto_values = {

@@ -1,17 +1,15 @@
 import json
 import logging
 from netfilterqueue import NetfilterQueue
-import experiment_handler
-import global_vars
-from packet_commands import get_payload
+from src import experiment_handler, global_vars, iptables
+from src.packet_commands import get_payload
 import os
-import iptables
 
 global_vars.dir_path = os.path.dirname(os.path.realpath(__file__))
 
 
 def read_config():
-    with open(os.path.join(global_vars.dir_path, 'config.json')) as json_data:
+    with open(os.path.join(global_vars.dir_path, 'configs', 'config.json')) as json_data:
         global_vars.config = json.load(json_data)
 
 

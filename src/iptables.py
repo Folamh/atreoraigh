@@ -1,4 +1,4 @@
-import global_vars
+from src import global_vars
 import subprocess
 import logging
 

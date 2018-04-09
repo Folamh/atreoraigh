@@ -2,9 +2,7 @@ import json
 import logging
 import socket
 import threading
-import instruction_handler
-import global_vars
-import iptables
+from src import instruction_handler, global_vars, iptables
 
 
 def experiment_instructions(data_json):

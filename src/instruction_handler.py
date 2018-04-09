@@ -3,7 +3,7 @@ import global_vars, iptables
 from datetime import datetime
 import logging
 import scapy.all as scapy
-import chardet
+# import chardet
 
 proto_values = {
     6: 'TCP',
@@ -66,9 +66,9 @@ class InstructionHandler:
         if payload.getlayer(scapy.Raw):
             logging.info('Recording packet.')
 
-            encoding = chardet.detect(payload.load)['encoding']
-            decoded_payload = payload.load.decode(encoding)
-            logging.debug('--------------> ' + decoded_payload + ' <----------------')
+            # encoding = chardet.detect(payload.load)['encoding']
+            encoding = 'utf-8'
+            decoded_payload = payload.load.decode(encoding, 'ignore')
 
             lineage = {
                 datetime.strftime(datetime.utcnow(), '%Y-%m-%d-%H-%M-%S-%f'): {

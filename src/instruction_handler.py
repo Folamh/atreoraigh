@@ -69,7 +69,7 @@ class InstructionHandler:
                     'dst': payload.dst,
                     'dport': payload.dport,
                     'type': proto_values[payload.proto],
-                    'data': payload.load.decode('utf-8')
+                    'data': payload.load
                 }
             })
 

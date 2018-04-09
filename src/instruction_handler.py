@@ -1,6 +1,9 @@
-from packet_commands import *
+from packet_commands import accept_packet, drop_packet, get_payload
 import global_vars, iptables
 from datetime import datetime
+import logging
+import scapy.all as scapy
+import chardet
 
 proto_values = {
     6: 'TCP',
@@ -62,16 +65,23 @@ class InstructionHandler:
     def lineage_recorder(self, payload):
         if payload.getlayer(scapy.Raw):
             logging.info('Recording packet.')
-            self.lineage[global_vars.current_experiment].append({
+
+            encoding = chardet.detect(payload.load)['encoding']
+            decoded_payload = payload.load.decode(encoding)
+            logging.debug('--------------> ' + decoded_payload + ' <----------------')
+
+            lineage = {
                 datetime.strftime(datetime.utcnow(), '%Y-%m-%d-%H-%M-%S-%f'): {
                     'src': payload.src,
                     'sport': payload.sport,
                     'dst': payload.dst,
                     'dport': payload.dport,
                     'type': proto_values[payload.proto],
-                    'data': payload.load
+                    'data': decoded_payload
                 }
-            })
+            }
+            logging.debug('Lineage: {}'.format(lineage))
+            self.lineage[global_vars.current_experiment].append(lineage)
 
     def build_instructions(self, experiment_json):
         instructions = {}

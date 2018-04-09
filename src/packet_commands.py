@@ -1,4 +1,5 @@
 import logging
+import scapy.all as scapy
 
 
 def drop_packet(packet):

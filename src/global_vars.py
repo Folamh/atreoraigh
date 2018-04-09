@@ -1,4 +1,5 @@
 dir_path = ''
+name = ''
 config = {}
 current_experiment = 0
 experiments = []
@@ -10,6 +11,7 @@ def reset():
     global current_experiment
     global experiments
     global routes
+    global name
 
     config = {}
     current_experiment = 0

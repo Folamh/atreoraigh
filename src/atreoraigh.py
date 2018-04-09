@@ -1,8 +1,8 @@
 import json
 import logging
 from netfilterqueue import NetfilterQueue
-from src import experiment_handler, global_vars, iptables
-from src.packet_commands import get_payload
+import experiment_handler, global_vars, iptables
+from packet_commands import get_payload
 import os
 
 global_vars.dir_path = os.path.dirname(os.path.realpath(__file__))

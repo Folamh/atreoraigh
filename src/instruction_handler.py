@@ -1,5 +1,5 @@
-from src.packet_commands import *
-from src import global_vars, iptables
+from packet_commands import *
+import global_vars, iptables
 from datetime import datetime
 
 proto_values = {

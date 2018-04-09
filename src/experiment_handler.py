@@ -45,7 +45,7 @@ def start_experiment(data_json):
 
 
 def listen_to_client(client, address):
-    size = 1024
+    size = 4092
     while True:
         try:
             data = client.recv(size)

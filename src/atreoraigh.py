@@ -7,7 +7,8 @@ import os
 import subprocess
 
 global_vars.dir_path = os.path.dirname(os.path.realpath(__file__))
-global_vars.name, err = subprocess.Popen(['hostname'], stdout=subprocess.PIPE, shell=True).communicate()
+output, err = subprocess.Popen(['hostname'], stdout=subprocess.PIPE, shell=True).communicate()
+global_vars.name = output.decode()
 
 
 def read_config():

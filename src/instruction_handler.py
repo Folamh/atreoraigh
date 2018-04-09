@@ -124,7 +124,8 @@ class InstructionHandler:
     def recording_finished(self):
         logging.info('Recording for port ' + str(self.port) + ' finished. Lineage: ' + str(self.lineage))
         self.instructions = {}
-        lineage = {'RECORDING-{}-{}'.format(global_vars.config['host'], str(self.port)): self.lineage[0]}
+        key = 'RECORDING-{}-{}'.format(global_vars.config['host'], str(self.port))
+        lineage = {key: self.lineage[0]}
         logging.debug('Sending: {}'.format(lineage))
         return lineage
 

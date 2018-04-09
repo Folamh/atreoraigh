@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='Atreoraigh',
-    version='',
+    version='1',
     packages=['venv.lib.python3.6.site-packages.scapy', 'venv.lib.python3.6.site-packages.scapy.arch',
               'venv.lib.python3.6.site-packages.scapy.arch.windows', 'venv.lib.python3.6.site-packages.scapy.asn1',
               'venv.lib.python3.6.site-packages.scapy.tools', 'venv.lib.python3.6.site-packages.scapy.crypto',
@@ -80,8 +80,8 @@ setup(
               'venv.lib64.python3.6.site-packages.pip-9.0.1-py3.6.egg.pip.commands',
               'venv.lib64.python3.6.site-packages.pip-9.0.1-py3.6.egg.pip.operations'],
     url='',
-    license='',
+    license='MIT',
     author='rmurphy',
-    author_email='',
-    description=''
+    author_email='ross.omurchadha@gmail.com',
+    description='FYP'
 )

@@ -17,7 +17,7 @@ def send_json(host, filename):
         sock.sendall(bytes(json.dumps(data), 'utf-8'))
 
         while True:
-            response = str(sock.recv(1024), 'utf-8')
+            response = str(sock.recv(4096), 'utf-8')
             print('Received: {}'.format(response))
             if response:
                 print('Received: {}'.format(response))

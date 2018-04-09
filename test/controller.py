@@ -22,7 +22,7 @@ def send_json(filename):
         node_sock.sendall(bytes(json.dumps(data), 'utf-8'))
 
         while True:
-            response = str(node_sock.recv(1024), 'utf-8')
+            response = str(node_sock.recv(4096), 'utf-8')
             if response:
                 print('Received: {}'.format(response))
             else:

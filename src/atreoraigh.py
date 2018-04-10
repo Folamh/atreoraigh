@@ -1,7 +1,7 @@
 import json
 import logging
 from netfilterqueue import NetfilterQueue
-import experiment_handler, global_vars, iptables
+import controller_handler, global_vars, iptables
 from packet_commands import get_payload
 import os
 import subprocess
@@ -38,7 +38,7 @@ def shutdown():
 if __name__ == '__main__':
     read_config()
     setup_logger()
-    server = experiment_handler.setup_server()
+    server = controller_handler.setup_server()
     netfilter_queue = NetfilterQueue()
     netfilter_queue.bind(1, manage_packet)
     try:

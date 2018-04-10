@@ -2,10 +2,18 @@ import json
 import logging
 import socket
 import threading
-import instruction_handler, global_vars, iptables
+import port_handler, global_vars, iptables
 
 
-def experiment_instructions(data_json):
+def final_response(client, response):
+    response = {
+        'type': response
+    }
+    response = bytes(json.dumps(response), 'utf-8')
+    client.sendall(response)
+
+
+def parse_experiment_instructions(client, data_json):
     add_to_experiments = True
     for experiment in global_vars.experiments:
         if experiment.port == data_json["port"]:
@@ -16,12 +24,14 @@ def experiment_instructions(data_json):
 
     if add_to_experiments:
         logging.info('Adding new experiment.')
-        new_instruction_handler = instruction_handler.InstructionHandler(int(data_json["port"]), 'INPUT')
+        new_instruction_handler = port_handler.PortHandler(int(data_json["port"]), 'INPUT')
         new_instruction_handler.build_instructions(data_json)
         global_vars.experiments.append(new_instruction_handler)
 
+    final_response(client, 'INSTRUCTIONS-OK')
 
-def experiment_record(data_json):
+
+def parse_experiment_record(data_json):
     add_to_experiments = True
     for port in data_json["ports"]:
         for experiment in global_vars.experiments:
@@ -32,16 +42,49 @@ def experiment_record(data_json):
 
         if add_to_experiments:
             logging.info('Adding new port {} to record.'.format(port["port"]))
-            new_instruction_handler = instruction_handler.InstructionHandler(int(port["port"]), 'INPUT')
+            new_instruction_handler = port_handler.PortHandler(int(port["port"]), 'INPUT')
             new_instruction_handler.setup_recording()
             global_vars.experiments.append(new_instruction_handler)
 
 
-def start_experiment(data_json):
+def start_experiments(client, data_json):
     global_vars.current_experiment = data_json["experiment"]
-    logging.info('Starting experiment: ' + str(global_vars.current_experiment))
+    logging.info('Starting experiment: {}'.format(data_json["experiment"]))
     for experiment in global_vars.experiments:
         experiment.setup_experiment()
+    final_response(client, 'START-OK')
+
+
+def finish_experiment(client):
+    logging.info('Experiment finished: Sending lineage to controller')
+    for experiment in global_vars.experiments:
+        data = json.dumps(experiment.experiment_finished())
+        response = bytes(data, 'utf-8')
+        client.sendall(response)
+    final_response(client, 'FINISH-EXPERIMENT-OK')
+
+
+def start_recording(client, data_json):
+    logging.info('Experiment finished: Sending lineage to controller')
+    global_vars.current_experiment = 0
+    parse_experiment_record(data_json)
+    final_response(client, 'RECORD-OK')
+
+
+def finish_recording(client):
+    logging.info('Recording finished: Sending lineage to controller')
+    for experiment in global_vars.experiments:
+        data = json.dumps(experiment.recording_finished())
+        response = bytes(data, 'utf-8')
+        client.sendall(response)
+    final_response(client, 'FINISH-RECORD-OK')
+
+
+def reset_node(client):
+    logging.info('Resetting node')
+    iptables.reset()
+    global_vars.reset()
+    final_response(client, 'RESET-OK')
 
 
 def listen_to_client(client, address):
@@ -54,45 +97,23 @@ def listen_to_client(client, address):
             if data:
                 logging.info(received)
                 if data_json["type"] == "INSTRUCTIONS":
-                    experiment_instructions(data_json)
-                    response = bytes('INSTRUCTIONS-OK', 'utf-8')
-                    client.sendall(response)
+                    parse_experiment_instructions(client, data_json)
 
                 elif data_json["type"] == "START":
-                    start_experiment(data_json)
-                    response = bytes('START-OK', 'utf-8')
-                    client.sendall(response)
+                    start_experiments(client, data_json)
 
                 elif data_json["type"] == "FINISH":
-                    logging.info('Sending lineage to controller')
-                    for experiment in global_vars.experiments:
-                        data = json.dumps(experiment.experiment_finished())
-                        response = bytes(data, 'utf-8')
-                        client.sendall(response)
-                    response = bytes('FINISH-OK', 'utf-8')
-                    client.sendall(response)
+                    finish_experiment(client)
 
                 elif data_json["type"] == "RECORD":
-                    global_vars.current_experiment = 0
-                    experiment_record(data_json)
-                    response = bytes('RECORD-OK', 'utf-8')
-                    client.sendall(response)
+                    start_recording(client, data_json)
 
                 elif data_json["type"] == "RECORD-FINISH":
-                    logging.info('Sending lineage to controller')
-                    for experiment in global_vars.experiments:
-                        data = json.dumps(experiment.recording_finished())
-                        response = bytes(data, 'utf-8')
-                        client.sendall(response)
-                    response = bytes('RECORD-FINISH-OK', 'utf-8')
-                    client.sendall(response)
+                    finish_recording(client)
 
                 elif data_json["type"] == "RESET":
-                    logging.info('Resetting node.')
-                    iptables.reset()
-                    global_vars.reset()
-                    response = bytes('RESET-OK', 'utf-8')
-                    client.sendall(response)
+                    reset_node(client)
+
                 else:
                     raise Exception('Invalid JSON.')
                 client.close()

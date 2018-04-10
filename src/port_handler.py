@@ -3,7 +3,6 @@ import global_vars, iptables
 from datetime import datetime
 import logging
 import scapy.all as scapy
-# import chardet
 
 proto_values = {
     6: 'TCP',
@@ -23,7 +22,7 @@ def reject_port(port, direction):
     iptables.reject_route('tcp', port, direction)
 
 
-class InstructionHandler:
+class PortHandler:
     def __init__(self, port, direction):
         self.port = port
         self.direction = direction
@@ -43,7 +42,7 @@ class InstructionHandler:
 
             if add_to_experiments:
                 logging.info('Adding new experiment.')
-                new_instruction_handler = InstructionHandler(payload.sport, 'OUTPUT')
+                new_instruction_handler = PortHandler(payload.sport, 'OUTPUT')
                 new_instruction_handler.setup_recording()
                 global_vars.experiments.append(new_instruction_handler)
 
@@ -66,7 +65,6 @@ class InstructionHandler:
         if payload.getlayer(scapy.Raw):
             logging.info('Recording packet.')
 
-            # encoding = chardet.detect(payload.load)['encoding']
             encoding = 'utf-8'
             decoded_payload = payload.load.decode(encoding, 'ignore')
 
@@ -110,8 +108,8 @@ class InstructionHandler:
         self.lineage.update({global_vars.current_experiment: []})
 
     def experiment_finished(self):
-        logging.info('Instructions for port ' + str(self.port) + ' finished. Lineage: ' + str(self.lineage[global_vars.
-                                                                                              current_experiment]))
+        logging.info('Instructions for port {} finished. Lineage: {}'
+                     .format(self.port, self.lineage[global_vars.current_experiment]))
         self.instructions = {}
         return {'EXPERIMENT{}-{}-{}'.format(str(global_vars.current_experiment), global_vars.name,
                                             str(self.port)): self.lineage[global_vars.current_experiment]}
@@ -122,7 +120,7 @@ class InstructionHandler:
         route_port(self.port, self.direction)
 
     def recording_finished(self):
-        logging.info('Recording for port ' + str(self.port) + ' finished. Lineage: ' + str(self.lineage))
+        logging.info('Recording for port {} finished. Lineage: {}'.format(self.port, self.lineage))
         lineage = {'RECORDING-{}-{}'.format(global_vars.name, str(self.port)): self.lineage[0]}
         logging.debug('Sending: {}'.format(lineage))
         return lineage

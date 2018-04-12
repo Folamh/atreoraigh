@@ -27,9 +27,9 @@ def send_json(host, filename):
 
 
 hosts = {
-    'program': '52.51.178.23',
-    'database1': '34.245.55.36',
-    'database2': '34.240.224.218'
+    'program': '34.242.140.18',
+    'database1': '34.242.206.68',
+    'database2': '52.211.63.195'
 }
 
 print('Recording test:')

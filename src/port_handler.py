@@ -70,6 +70,8 @@ class PortHandler:
 
             lineage = {
                 datetime.strftime(datetime.utcnow(), '%Y-%m-%d-%H-%M-%S-%f'): {
+                    'host': global_vars.hostname,
+                    'direction': self.direction,
                     'src': payload.src,
                     'sport': payload.sport,
                     'dst': payload.dst,
@@ -111,8 +113,7 @@ class PortHandler:
         logging.info('Instructions for port {} finished. Lineage: {}'
                      .format(self.port, self.lineage[global_vars.current_experiment]))
         self.instructions = {}
-        return {'EXPERIMENT{}-{}-{}'.format(str(global_vars.current_experiment), global_vars.name,
-                                            str(self.port)): self.lineage[global_vars.current_experiment]}
+        return {'EXPERIMENT-{}'.format(global_vars.current_experiment): self.lineage[global_vars.current_experiment]}
 
     def setup_recording(self):
         self.record = True
@@ -121,7 +122,7 @@ class PortHandler:
 
     def recording_finished(self):
         logging.info('Recording for port {} finished. Lineage: {}'.format(self.port, self.lineage))
-        lineage = {'RECORDING-{}-{}'.format(global_vars.name, str(self.port)): self.lineage[0]}
+        lineage = {'RECORDING': self.lineage[0]}
         logging.debug('Sending: {}'.format(lineage))
         return lineage
 

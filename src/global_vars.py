@@ -1,5 +1,5 @@
 dir_path = ''
-name = ''
+hostname = ''
 config = {}
 current_experiment = 0
 experiments = []
@@ -11,7 +11,7 @@ def reset():
     global current_experiment
     global experiments
     global routes
-    global name
+    global hostname
 
     config = {}
     current_experiment = 0

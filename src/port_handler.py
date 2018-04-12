@@ -3,7 +3,6 @@ import global_vars, iptables
 from datetime import datetime
 import logging
 import scapy.all as scapy
-import re
 
 proto_values = {
     6: 'TCP',
@@ -67,7 +66,7 @@ class PortHandler:
             logging.info('Recording packet.')
 
             encoding = 'utf-8'
-            decoded_payload = re.sub(r'[^ -~].*', '', payload.load.decode(encoding, 'ignore'))
+            decoded_payload = payload.load.decode(encoding, 'ignore')
 
             lineage = {
                 datetime.strftime(datetime.utcnow(), '%Y-%m-%d-%H-%M-%S-%f'): {

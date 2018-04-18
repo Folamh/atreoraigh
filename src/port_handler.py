@@ -32,6 +32,7 @@ class PortHandler:
         self.instruction_counter = 1
         self.lineage = {}
         self.record = False
+        self.reject_return = False
 
     def manage_packet(self, packet):
         payload = get_payload(packet)
@@ -39,12 +40,19 @@ class PortHandler:
             add_to_experiments = True
             for experiment in global_vars.experiments:
                 if experiment.port == payload.sport:
+                    if self.reject_return:
+                        reject_port(experiment.port, 'OUTPUT')
+                    else:
+                        experiment.setup_recording()
                     add_to_experiments = False
 
             if add_to_experiments:
                 logging.info('Adding new experiment.')
                 new_instruction_handler = PortHandler(payload.sport, 'OUTPUT')
-                new_instruction_handler.setup_recording()
+                if self.reject_return:
+                    reject_port(new_instruction_handler.port, 'OUTPUT')
+                else:
+                    new_instruction_handler.setup_recording()
                 global_vars.experiments.append(new_instruction_handler)
 
         if self.record:
@@ -95,6 +103,8 @@ class PortHandler:
         for instruction in experiment_json['instructions']:
             if instruction['instruction'] == 'REJECT':
                 reject_port(self.port, self.direction)
+            elif instruction['instruction'] == 'REJECT-RETURN':
+                self.reject_return = True
             else:
                 instructions.update({
                     instruction['step']: command_map[instruction['instruction']]

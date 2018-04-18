@@ -6,9 +6,10 @@ from packet_commands import get_payload
 import os
 import subprocess
 
-global_vars.dir_path = os.path.dirname(os.path.realpath(__file__))
-output, err = subprocess.Popen(['hostname'], stdout=subprocess.PIPE, shell=True).communicate()
-global_vars.hostname = output.decode('utf-8').strip()
+
+def set_hostname():
+    output, err = subprocess.Popen(['hostname'], stdout=subprocess.PIPE, shell=True).communicate()
+    global_vars.hostname = output.decode('utf-8').strip()
 
 
 def read_config():
@@ -36,6 +37,8 @@ def shutdown():
 
 
 if __name__ == '__main__':
+    global_vars.dir_path = os.path.dirname(os.path.realpath(__file__))
+    set_hostname()
     read_config()
     setup_logger()
     server = controller_handler.setup_server()

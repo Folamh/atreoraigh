@@ -43,7 +43,7 @@ class PortHandler:
                     if self.reject_return:
                         reject_port(experiment.port, 'OUTPUT')
                     else:
-                        experiment.setup_recording()
+                        self.record = True
                     add_to_experiments = False
 
             if add_to_experiments:
@@ -90,9 +90,7 @@ class PortHandler:
                 }
             }
             logging.debug('Lineage: {}'.format(lineage))
-            logging.debug(self.lineage)
             self.lineage[global_vars.current_experiment].append(lineage)
-            logging.debug(self.lineage)
 
     def build_instructions(self, experiment_json):
         instructions = {}

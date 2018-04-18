@@ -90,7 +90,9 @@ class PortHandler:
                 }
             }
             logging.debug('Lineage: {}'.format(lineage))
+            logging.debug(self.lineage)
             self.lineage[global_vars.current_experiment].append(lineage)
+            logging.debug(self.lineage)
 
     def build_instructions(self, experiment_json):
         instructions = {}

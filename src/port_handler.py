@@ -119,6 +119,7 @@ class PortHandler:
         self.instruction_counter = 1
         self.instructions = self.experiments_queue[global_vars.current_experiment]
         self.lineage.update({global_vars.current_experiment: []})
+        route_port(self.port, self.direction)
 
     def experiment_finished(self):
         logging.info('Instructions for port {} finished. Lineage: {}'

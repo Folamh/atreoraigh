@@ -32,6 +32,7 @@ class PortHandler:
         self.instruction_counter = 1
         self.lineage = {}
         self.record = False
+        self.reject = False
         self.reject_return = False
 
     def manage_packet(self, packet):
@@ -103,6 +104,7 @@ class PortHandler:
         for instruction in experiment_json['instructions']:
             if instruction['instruction'] == 'REJECT':
                 reject_port(self.port, self.direction)
+                self.reject = True
             elif instruction['instruction'] == 'REJECT-RETURN':
                 self.reject_return = True
             else:
@@ -119,7 +121,8 @@ class PortHandler:
         self.instruction_counter = 1
         self.instructions = self.experiments_queue[global_vars.current_experiment]
         self.lineage.update({global_vars.current_experiment: []})
-        route_port(self.port, self.direction)
+        if not self.reject:
+            route_port(self.port, self.direction)
 
     def experiment_finished(self):
         logging.info('Instructions for port {} finished. Lineage: {}'
